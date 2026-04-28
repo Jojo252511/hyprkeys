@@ -1,8 +1,8 @@
 # HyprKeys — Caelestia Rice
 
-Keybind-Manager für Hyprland. Backend (FastAPI) + Web-Frontend.
+HyprKeys is a sleek, web-based Keybinding Manager specifically designed for Hyprland. It provides a modern interface to manage your hyprland keybinds without losing the flexibility of manual configuration
 
-## Struktur
+## Folder structure
 
 ```
 hyprkeys/
@@ -11,51 +11,26 @@ hyprkeys/
 │   └── requirements.txt
 ├── frontend/
 │   └── index.html        # Single-file Web-UI
-├── start.sh              # Alles starten
+├── start.sh              
 └── README.md
 ```
 
-## Schnellstart
+## Starteing
 
 ```bash
 chmod +x start.sh
 ./start.sh
 ```
 
-Oder manuell:
+## API-Endpoints
 
-```bash
-# Backend
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
-
-# Frontend: index.html im Browser öffnen
-```
-
-## Eigener Config-Pfad
-
-```bash
-HYPR_CONFIG=~/.config/hypr/hyprland.conf ./start.sh
-```
-
-## API-Endpunkte
-
-| Methode | Pfad                    | Beschreibung              |
+| Method  | Path                    | Description               |
 |---------|-------------------------|---------------------------|
-| GET     | /api/keybinds           | Alle Keybinds auslesen    |
-| POST    | /api/keybinds           | Neue Keybind erstellen    |
-| PUT     | /api/keybinds/{id}      | Keybind bearbeiten        |
-| DELETE  | /api/keybinds/{id}      | Keybind löschen           |
-| GET     | /api/dispatchers        | Alle Dispatcher-Namen     |
-| GET     | /api/config-path        | Aktueller Config-Pfad     |
-| GET     | /health                 | Backend-Status            |
+| GET     | /api/keybinds           | List all parsed keybinds  |
+| POST    | /api/keybinds           | Create a new keybind      |
+| PUT     | /api/keybinds/{id}      | Update an existing keybind|
+| DELETE  | /api/keybinds/{id}      | Remove a keybind          |
+| GET     | /api/dispatchers        | List all dispatcher names |
+| GET     | /api/config-path        | Current configuration path|
+| GET     | /health                 | Backend status            |
 
-## Features
-
-- ✅ Liest `bind =` Zeilen aus `hyprland.conf`
-- ✅ Automatisches Backup vor jeder Änderung (`.conf.bak_YYYYMMDD_HHMMSS`)
-- ✅ Suche & Filter nach Dispatcher
-- ✅ Erstellen / Bearbeiten / Löschen
-- ✅ Kommentar-Unterstützung (`# ...`)
-- ✅ Keine Datenbank – direkt in der Config-Datei
