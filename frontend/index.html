@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HyprKeys — Caelestia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:      #0b0d11;
+      --surf:    #111318;
+      --surf2:   #161a22;
+      --brd:     #1e2128;
+      --brd2:    #2a2f3a;
+      --text:    #c9cdd8;
+      --muted:   #5a6070;
+      --accent:  #7eb8f7;
+      --purple:  #b48eff;
+      --green:   #7dcfb6;
+      --red:     #f07178;
+      --yellow:  #ffd580;
+      --orange:  #ffb347;
+      --glow:    rgba(126,184,247,.18);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body { font-family: 'Geist Mono', monospace; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* HEADER */
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 28px; border-bottom: 1px solid var(--brd);
+      background: linear-gradient(90deg, rgba(126,184,247,.05) 0%, transparent 70%);
+      position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px);
+    }
+    .logo { display: flex; align-items: baseline; gap: 10px; }
+    .logo-title { font-family: 'Syne', sans-serif; font-size: 1.35rem; font-weight: 800; color: var(--accent); letter-spacing: -.02em; }
+    .logo-sub { font-size: .68rem; color: var(--purple); letter-spacing: .14em; text-transform: uppercase; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .file-tag { font-size: .68rem; color: var(--muted); background: var(--surf); border: 1px solid var(--brd); border-radius: 4px; padding: 3px 9px; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2.2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.35} }
+
+    /* TABS */
+    .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--brd); padding: 0 28px; background: var(--surf); }
+    .tab { padding: 12px 20px; font-size: .78rem; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; letter-spacing: .04em; }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* TOOLBAR */
+    .toolbar { display: flex; align-items: center; gap: 8px; padding: 14px 28px; border-bottom: 1px solid var(--brd); flex-wrap: wrap; }
+    .search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 360px; }
+    .search-wrap::before { content: '⌕'; position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+    input[type=text], select {
+      background: var(--surf); border: 1px solid var(--brd); color: var(--text);
+      font-family: inherit; font-size: .8rem; border-radius: 6px; outline: none;
+      transition: border-color .18s, box-shadow .18s;
+    }
+    input[type=text] { width: 100%; padding: 8px 10px 8px 30px; }
+    select { padding: 8px 10px; }
+    input[type=text]:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+    .btn { font-family: 'Geist Mono', monospace; font-size: .76rem; padding: 8px 14px; border-radius: 6px; border: none; cursor: pointer; transition: all .15s; white-space: nowrap; }
+    .btn-primary { background: var(--accent); color: #0b0d11; font-weight: 600; }
+    .btn-primary:hover { filter: brightness(1.1); box-shadow: 0 0 14px var(--glow); }
+    .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--brd2); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .badge { font-size: .68rem; color: var(--muted); background: var(--surf); border: 1px solid var(--brd); border-radius: 99px; padding: 3px 10px; margin-left: auto; }
+
+    /* PANEL */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* TABLE */
+    main { padding: 20px 28px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .79rem; }
+    thead th { text-align: left; padding: 9px 12px; color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--brd); letter-spacing: .06em; text-transform: uppercase; font-size: .65rem; white-space: nowrap; }
+    tbody tr { border-bottom: 1px solid var(--brd); transition: background .1s; }
+    tbody tr:hover { background: rgba(126,184,247,.04); }
+    tbody td { padding: 9px 12px; vertical-align: middle; }
+
+    /* BADGES */
+    .badge-mod { display: inline-flex; flex-wrap: wrap; gap: 3px; }
+    .chip { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: .72rem; font-weight: 500; line-height: 1.4; white-space: nowrap; }
+    .chip-mod  { background: rgba(180,142,255,.13); color: var(--purple); border: 1px solid rgba(180,142,255,.22); }
+    .chip-key  { background: rgba(126,184,247,.13); color: var(--accent); border: 1px solid rgba(126,184,247,.22); }
+    .chip-type { background: rgba(255,211,128,.10); color: var(--yellow); border: 1px solid rgba(255,211,128,.20); font-size: .65rem; }
+    .chip-var  { background: rgba(125,207,182,.10); color: var(--green); border: 1px solid rgba(125,207,182,.22); font-size: .68rem; }
+    .cell-dispatcher { color: var(--green); font-weight: 500; }
+    .cell-arg { color: var(--text); }
+    .cell-comment { color: var(--muted); font-size: .72rem; font-style: italic; }
+    .cell-raw { color: var(--muted); font-size: .68rem; margin-top: 2px; }
+    .actions { display: flex; gap: 5px; }
+    .btn-icon { background: transparent; border: 1px solid var(--brd2); color: var(--muted); font-size: .75rem; padding: 4px 8px; border-radius: 5px; cursor: pointer; transition: all .13s; font-family: inherit; }
+    .btn-icon.edit:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-icon.del:hover  { border-color: var(--red);    color: var(--red); }
+
+    /* VARIABLES TABLE */
+    .var-table { width: 100%; border-collapse: collapse; font-size: .79rem; }
+    .var-table th { text-align: left; padding: 9px 12px; color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--brd); letter-spacing: .06em; text-transform: uppercase; font-size: .65rem; }
+    .var-table tr { border-bottom: 1px solid var(--brd); transition: background .1s; }
+    .var-table tr:hover { background: rgba(126,184,247,.04); }
+    .var-table td { padding: 9px 12px; vertical-align: middle; }
+    .var-name { color: var(--green); font-weight: 500; }
+    .var-input { background: transparent; border: none; color: var(--text); font-family: inherit; font-size: .79rem; width: 100%; outline: none; padding: 2px 0; border-bottom: 1px solid transparent; transition: border-color .15s; }
+    .var-input:focus { border-bottom-color: var(--accent); }
+    .btn-save { background: transparent; border: 1px solid var(--green); color: var(--green); font-size: .7rem; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-family: inherit; transition: all .13s; }
+    .btn-save:hover { background: rgba(125,207,182,.12); }
+
+    /* EMPTY */
+    .empty-state { text-align: center; padding: 70px 20px; color: var(--muted); }
+    .empty-state .icon { font-size: 2.5rem; opacity: .35; margin-bottom: 14px; }
+    .empty-state p { font-size: .82rem; }
+
+    /* MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.72); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; pointer-events: none; transition: opacity .18s; }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal { background: var(--surf2); border: 1px solid var(--brd2); border-radius: 12px; padding: 26px; width: 540px; max-width: 95vw; transform: translateY(18px) scale(.97); transition: transform .18s; box-shadow: 0 24px 80px rgba(0,0,0,.6); }
+    .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+    .modal h2 { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--accent); margin-bottom: 20px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group.full { grid-column: 1/-1; }
+    label { font-size: .67rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+    .form-group input, .form-group select { padding: 8px 10px; width: 100%; }
+    .bind-type-hint { font-size: .68rem; color: var(--muted); margin-top: 3px; }
+    .modal-footer { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
+
+    /* TOAST */
+    #toast { position: fixed; bottom: 22px; right: 22px; background: var(--surf2); border: 1px solid var(--brd2); color: var(--text); font-size: .78rem; padding: 9px 16px; border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,.4); transform: translateY(18px); opacity: 0; transition: all .22s; z-index: 999; font-family: 'Geist Mono', monospace; }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.success { border-left: 3px solid var(--green); }
+    #toast.error   { border-left: 3px solid var(--red); }
+    #toast.info    { border-left: 3px solid var(--accent); }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-thumb { background: var(--brd2); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-title">HyprKeys</span>
+    <span class="logo-sub">Caelestia</span>
+  </div>
+  <div class="header-right">
+    <div class="file-tag" id="keybindsPath">…</div>
+    <div class="status-dot" id="statusDot"></div>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('keybinds', this)">⌨ Keybinds</div>
+  <div class="tab" onclick="switchTab('variables', this)">$ Variablen</div>
+</div>
+
+<!-- KEYBINDS PANEL -->
+<div class="panel active" id="panel-keybinds">
+  <div class="toolbar">
+    <div class="search-wrap">
+      <input type="text" id="search" placeholder="Suche: SUPER, exec, kitty …" oninput="renderTable()" />
+    </div>
+    <select id="filterType" onchange="renderTable()">
+      <option value="">Alle Typen</option>
+      <option value="bind">bind</option>
+      <option value="binde">binde</option>
+      <option value="bindl">bindl</option>
+      <option value="bindle">bindle</option>
+      <option value="bindr">bindr</option>
+      <option value="bindm">bindm</option>
+      <option value="bindi">bindi</option>
+      <option value="bindin">bindin</option>
+    </select>
+    <select id="filterDispatcher" onchange="renderTable()">
+      <option value="">Alle Dispatcher</option>
+    </select>
+    <button class="btn btn-primary" onclick="openModal()">＋ Neu</button>
+    <button class="btn btn-ghost" onclick="loadAll()">↻</button>
+    <span class="badge" id="countBadge">0</span>
+  </div>
+  <main>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Typ</th>
+            <th>Modifier</th>
+            <th>Taste</th>
+            <th>Dispatcher</th>
+            <th>Argument</th>
+            <th>Kommentar</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none">
+        <div class="icon">⌨</div>
+        <p>Keine Keybinds gefunden.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- VARIABLES PANEL -->
+<div class="panel" id="panel-variables">
+  <div class="toolbar">
+    <div class="search-wrap">
+      <input type="text" id="varSearch" placeholder="Variable suchen …" oninput="renderVars()" />
+    </div>
+    <span class="badge" id="varCountBadge">0</span>
+  </div>
+  <main>
+    <div class="table-wrap">
+      <table class="var-table">
+        <thead>
+          <tr>
+            <th style="width:220px">Variable</th>
+            <th>Wert</th>
+            <th style="width:80px"></th>
+          </tr>
+        </thead>
+        <tbody id="varTbody"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOnBg(event)">
+  <div class="modal">
+    <h2 id="modalTitle">Neue Keybind</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Bind-Typ</label>
+        <select id="fType" onchange="updateTypeHint()">
+          <option value="bind">bind – Normal</option>
+          <option value="binde">binde – Repeat beim Halten</option>
+          <option value="bindl">bindl – Auch bei Lock-Screen</option>
+          <option value="bindle">bindle – Lock + Repeat</option>
+          <option value="bindr">bindr – Beim Loslassen</option>
+          <option value="bindm">bindm – Maus-Aktion</option>
+          <option value="bindi">bindi – Ignoriert Inhibitoren</option>
+          <option value="bindin">bindin – Ignoriert + Non-consuming</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Dispatcher</label>
+        <select id="fDispatcher"></select>
+      </div>
+      <div class="form-group">
+        <label>Modifier <span style="color:var(--muted);font-size:.65rem">(oder $Variable)</span></label>
+        <input type="text" id="fMod" placeholder="Super, $kbTerminal, Ctrl+Alt …" />
+      </div>
+      <div class="form-group">
+        <label>Taste</label>
+        <input type="text" id="fKey" placeholder="T, Return, F1, mouse:272 …" />
+      </div>
+      <div class="form-group full">
+        <label>Argument <span style="color:var(--muted);font-size:.65rem">(optional)</span></label>
+        <input type="text" id="fArg" placeholder="z.B. kitty, 1, exec caelestia …" />
+      </div>
+      <div class="form-group full">
+        <label>Kommentar <span style="color:var(--muted);font-size:.65rem">(optional)</span></label>
+        <input type="text" id="fComment" placeholder="Terminal öffnen …" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Abbrechen</button>
+      <button class="btn btn-primary" onclick="saveKeybind()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = "http://localhost:8000";
+let allBinds = [], allVars = [], editingId = null;
+
+// ---------------------------------------------------------------------------
+// INIT
+// ---------------------------------------------------------------------------
+async function loadAll() {
+  await Promise.all([loadConfigInfo(), loadDispatchers(), loadBinds(), loadVars()]);
+}
+
+async function loadConfigInfo() {
+  try {
+    const r = await fetch(`${API}/api/config-info`);
+    const d = await r.json();
+    document.getElementById("keybindsPath").textContent = d.keybinds_file;
+    const dot = document.getElementById("statusDot");
+    dot.style.background = d.keybinds_exists ? "var(--green)" : "var(--yellow)";
+    dot.style.boxShadow  = d.keybinds_exists ? "0 0 6px var(--green)" : "0 0 6px var(--yellow)";
+  } catch {
+    document.getElementById("statusDot").style.background = "var(--red)";
+  }
+}
+
+async function loadDispatchers() {
+  try {
+    const r = await fetch(`${API}/api/dispatchers`);
+    const list = await r.json();
+    const fd = document.getElementById("fDispatcher");
+    const fs = document.getElementById("filterDispatcher");
+    fd.innerHTML = ""; fs.innerHTML = '<option value="">Alle Dispatcher</option>';
+    list.forEach(d => {
+      fd.innerHTML += `<option value="${d}">${d}</option>`;
+      fs.innerHTML += `<option value="${d}">${d}</option>`;
+    });
+  } catch {}
+}
+
+async function loadBinds() {
+  try {
+    const r = await fetch(`${API}/api/keybinds`);
+    allBinds = await r.json();
+    renderTable();
+    toast(`${allBinds.length} Keybinds geladen`, "success");
+  } catch { toast("Backend nicht erreichbar", "error"); }
+}
+
+async function loadVars() {
+  try {
+    const r = await fetch(`${API}/api/variables`);
+    allVars = await r.json();
+    renderVars();
+  } catch {}
+}
+
+// ---------------------------------------------------------------------------
+// TABS
+// ---------------------------------------------------------------------------
+function switchTab(name, el) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  el.classList.add("active");
+  document.getElementById(`panel-${name}`).classList.add("active");
+}
+
+// ---------------------------------------------------------------------------
+// KEYBINDS TABLE
+// ---------------------------------------------------------------------------
+function renderTable() {
+  const q  = document.getElementById("search").value.toLowerCase();
+  const dt = document.getElementById("filterType").value;
+  const dd = document.getElementById("filterDispatcher").value;
+
+  const filtered = allBinds.filter(b => {
+    const searchStr = [b.modifier_raw, b.modifier_resolved, b.key_raw, b.key_resolved,
+                       b.dispatcher, b.argument, b.comment, b.bind_type].join(" ").toLowerCase();
+    return searchStr.includes(q)
+      && (!dt || b.bind_type === dt)
+      && (!dd || b.dispatcher === dd);
+  });
+
+  document.getElementById("countBadge").textContent = `${filtered.length} Bind${filtered.length !== 1 ? "s" : ""}`;
+  const tbody = document.getElementById("tbody");
+  const empty = document.getElementById("emptyState");
+
+  if (!filtered.length) { tbody.innerHTML = ""; empty.style.display = "block"; return; }
+  empty.style.display = "none";
+
+  tbody.innerHTML = filtered.map(b => {
+    // Modifier: zeige resolved, und wenn anders als raw, auch raw darunter
+    const modChips = b.modifier_resolved.split("+").map(m => m.trim()).filter(Boolean)
+      .map(m => `<span class="chip chip-mod">${m}</span>`).join("");
+    const modRawDiff = b.modifier_raw !== b.modifier_resolved && b.modifier_raw.startsWith("$");
+    const modExtra = modRawDiff ? `<div class="cell-raw">${b.modifier_raw}</div>` : "";
+
+    const keyIsVar = b.key_raw !== b.key_resolved;
+    const keyLabel = b.key_resolved || b.key_raw;
+
+    return `<tr>
+      <td><span class="chip chip-type">${b.bind_type}</span></td>
+      <td>
+        <div class="badge-mod">${modChips || '<span style="color:var(--muted)">—</span>'}</div>
+        ${modExtra}
+      </td>
+      <td>
+        <span class="chip chip-key">${keyLabel}</span>
+        ${keyIsVar ? `<div class="cell-raw">${b.key_raw}</div>` : ""}
+      </td>
+      <td class="cell-dispatcher">${b.dispatcher}</td>
+      <td class="cell-arg">${b.argument || '<span style="color:var(--muted)">—</span>'}</td>
+      <td class="cell-comment">${b.comment ? "# " + b.comment : ""}</td>
+      <td>
+        <div class="actions">
+          <button class="btn-icon edit" onclick='editBind(${JSON.stringify(b)})'>✎</button>
+          <button class="btn-icon del"  onclick="deleteBind('${b.id}')">✕</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+// ---------------------------------------------------------------------------
+// VARIABLES TABLE
+// ---------------------------------------------------------------------------
+function renderVars() {
+  const q = document.getElementById("varSearch").value.toLowerCase();
+  const filtered = allVars.filter(v =>
+    v.name.toLowerCase().includes(q) || v.value.toLowerCase().includes(q)
+  );
+  document.getElementById("varCountBadge").textContent = `${filtered.length} Vars`;
+  document.getElementById("varTbody").innerHTML = filtered.map(v => `
+    <tr>
+      <td class="var-name">$${v.name}</td>
+      <td>
+        <input class="var-input" id="vi_${v.name}" value="${escHtml(v.value)}"
+               onkeydown="if(event.key==='Enter')saveVar('${v.name}')" />
+      </td>
+      <td>
+        <button class="btn-save" onclick="saveVar('${v.name}')">Speichern</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+async function saveVar(name) {
+  const el = document.getElementById(`vi_${name}`);
+  if (!el) return;
+  try {
+    const r = await fetch(`${API}/api/variables/${name}`, {
+      method: "PUT",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({value: el.value.trim()})
+    });
+    if (!r.ok) throw new Error();
+    await loadVars();
+    toast(`$${name} gespeichert`, "success");
+  } catch { toast("Fehler beim Speichern", "error"); }
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+// ---------------------------------------------------------------------------
+// MODAL
+// ---------------------------------------------------------------------------
+function openModal(bind = null) {
+  editingId = bind?.id || null;
+  document.getElementById("modalTitle").textContent = bind ? "Keybind bearbeiten" : "Neue Keybind";
+  document.getElementById("fType").value = bind?.bind_type || "bind";
+  document.getElementById("fMod").value  = bind?.modifier_raw || "Super";
+  document.getElementById("fKey").value  = bind?.key_raw || "";
+  document.getElementById("fDispatcher").value = bind?.dispatcher || "exec";
+  document.getElementById("fArg").value  = bind?.argument || "";
+  document.getElementById("fComment").value = bind?.comment || "";
+  document.getElementById("modalOverlay").classList.add("open");
+}
+
+function editBind(b) { openModal(b); }
+
+function closeModal() {
+  document.getElementById("modalOverlay").classList.remove("open");
+  editingId = null;
+}
+
+function closeModalOnBg(e) {
+  if (e.target === document.getElementById("modalOverlay")) closeModal();
+}
+
+async function saveKeybind() {
+  const body = {
+    bind_type:  document.getElementById("fType").value,
+    modifier:   document.getElementById("fMod").value.trim(),
+    key:        document.getElementById("fKey").value.trim(),
+    dispatcher: document.getElementById("fDispatcher").value,
+    argument:   document.getElementById("fArg").value.trim(),
+    comment:    document.getElementById("fComment").value.trim(),
+  };
+  if (!body.key || !body.dispatcher) { toast("Taste und Dispatcher erforderlich", "error"); return; }
+  try {
+    const url    = editingId ? `${API}/api/keybinds/${editingId}` : `${API}/api/keybinds`;
+    const method = editingId ? "PUT" : "POST";
+    const r = await fetch(url, { method, headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
+    if (!r.ok) throw new Error();
+    closeModal();
+    await loadBinds();
+    toast(editingId ? "Keybind aktualisiert" : "Keybind erstellt", "success");
+  } catch { toast("Fehler beim Speichern", "error"); }
+}
+
+async function deleteBind(id) {
+  if (!confirm("Keybind wirklich löschen?")) return;
+  try {
+    const r = await fetch(`${API}/api/keybinds/${id}`, { method: "DELETE" });
+    if (!r.ok) throw new Error();
+    await loadBinds();
+    toast("Keybind gelöscht", "success");
+  } catch { toast("Fehler beim Löschen", "error"); }
+}
+
+// ---------------------------------------------------------------------------
+// TOAST
+// ---------------------------------------------------------------------------
+function toast(msg, type = "info") {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.className = `show ${type}`;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.className = "", 2800);
+}
+
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+loadAll();
+</script>
+</body>
+</html>
